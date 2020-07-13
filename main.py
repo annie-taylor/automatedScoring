@@ -6,7 +6,7 @@ from Session import Session
 from Trial import Trial
 import trainingClass as tc
 
-class wrapperBullshit():
+class wrapper():
     def __init__(self):
         time1 = time.time()
         Tk().withdraw()
@@ -43,7 +43,7 @@ class wrapperBullshit():
         return
     
 def main():
-    wrap = wrapperBullshit()
+    wrap = wrapper()
     wrap.addRat()
     wrap.addTrainClass()
     #Try training classifier with pca = 7 dim, knn = 3 neighbors
