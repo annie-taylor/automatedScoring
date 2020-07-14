@@ -4,6 +4,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.ensemble import BaggingClassifier
 from sklearn.neighbors import KNeighborsClassifier as kNN
+import picklepy
 
 class trainingClass:
     #This is meant to combine trial data across multiple rats as well as
@@ -82,6 +83,10 @@ class trainingClass:
         
         self.PCAmodel = pipe.named_steps['ipca']
         self.kNNmodel = pipe.named_steps['knn']
+        
+        #Save objects as pck
+        pickle.dump(self.PCAmodel,open('PCAmodel.p','wb'))
+        pickle.dump(self.kNNmodel,open('kNNmodel.p','wb'))
         
         train_score = pipe.score(trainData,trainLabel)
         test_score = pipe.score(testData,testLabel)
