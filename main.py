@@ -8,6 +8,7 @@ from Trial import Trial
 import trainingClass as tc
 import easygui as gui
 import pickle
+import os
 
 class wrapper():
     def __init__(self):
@@ -100,16 +101,45 @@ def askParams():
             fieldValues.append(float(input[i]))
     print("Reply was: %s" % str(fieldValues))
     return fieldValues
+ 
+def initialAsk():
+    msg = "Do you want to load an old classifier or train a new classifier?"
+    title = "Start"
+    fieldNames = ["Old","New"]
+    response = ""  # we start with blanks for the values
+    response = gui.buttonbox(msg,title, fieldNames)
+    return response
 
-    
-def main():
-    wrap = wrapper()
-    #Try training classifier with pca = 7 dim, knn = 3 neighbors
+def askTrainClassifier(wrap):
     time1 = time.time()
     response = askParams()
     wrap.training.trainClassifier(response[0],response[1],response[2])
     time2 = time.time()
     print("Time to initialize train classifier: %f" % (time2-time1))
+
+def selectClassifier():
+    path = os.getcwd()
+    files = os.listdir(path)
+    pickles = []
+    for file in files:
+        if file.endswith('Classifier.p'):
+            pickles.append(file)
     
+    msg = "Choose file to reload previously trained classifier"
+    title = "Select classifier"
+    response = ""  # we start with blanks for the values
+    response = gui.buttonbox(msg,title, pickles)
+    return response
+    
+def main():
+    response = initialAsk()
+    if response == "Old":
+        filename = selectClassifier()
+        print(filename)
+    elif response == "New":
+        wrap = wrapper()
+        #Try training classifier with pca = 7 dim, knn = 3 neighbors
+        askTrainClassifier(wrap)
+
 if __name__ == '__main__':
     main()
