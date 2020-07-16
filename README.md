@@ -1,4 +1,7 @@
 # automatedScoring
+
+**Readme is not longer up to date, does not reflect changes made on 7/15/20**
+
 To run automatedScoring program in command line, follow the steps below (only need to perform step 1 when first downloading program):
 
 1. git clone https://github.com/annie-taylor/automatedScoring
