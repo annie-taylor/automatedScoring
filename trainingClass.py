@@ -4,13 +4,16 @@ from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.ensemble import BaggingClassifier
 from sklearn.neighbors import KNeighborsClassifier as kNN
-import picklepy
+import pickle
+import easygui as gui
 
 class trainingClass:
     #This is meant to combine trial data across multiple rats as well as
     #saving the parameters for PCA transforms and kNN classifiers
     #*args should be Rat class
     def __init__(self,ratList):
+        # Add an option to load a trained classifier into a new trainingClass?
+    
         # PCA model should be updated each time, currently not doing this...?
         self.PCAmodel = 0
         self.kNNmodel = 0
@@ -84,9 +87,20 @@ class trainingClass:
         self.PCAmodel = pipe.named_steps['ipca']
         self.kNNmodel = pipe.named_steps['knn']
         
-        #Save objects as pck
-        pickle.dump(self.PCAmodel,open('PCAmodel.p','wb'))
-        pickle.dump(self.kNNmodel,open('kNNmodel.p','wb'))
+        #Save classifier as pck
+        #pickle.dump(self.PCAmodel,open('PCAmodel.p','wb'))
+        #pickle.dump(self.kNNmodel,open('kNNmodel.p','wb'))
+        
+        wholeModel = {'PCA':self.PCAmodel,'kNN':self.kNNmodel}
+        
+        prefix = self.nameClassifier()
+        print(prefix)
+        if (prefix == ''):
+            picklename = 'Classifier.p'
+            #print('no response')
+        else:
+            picklename = prefix+'Classifier.p'
+        pickle.dump(wholeModel,open(picklename,'wb'))
         
         train_score = pipe.score(trainData,trainLabel)
         test_score = pipe.score(testData,testLabel)
@@ -94,3 +108,42 @@ class trainingClass:
         print('Testing score is: %f' % test_score)
         
         return
+        
+    def nameClassifier(self):
+        msg = 'Type filename for this classifier:'
+        title = 'Name Classifier'
+        fieldNames = ['Prefix']
+        fuckYouThisisTotallyFineHere = ''
+        reply = gui.multenterbox(msg,title,fieldNames)[0]
+        print(reply)
+        if reply == '':
+            doubleCheck = gui.ccbox(msg='If you do not enter a prefix, file will be saved as "Classifier.p". Continue?',title='You did not enter a prefix')
+            if doubleCheck:
+                reply = ['']
+                print('no response')
+                pass
+            else:
+                reply = gui.multenterbox(msg,title,fieldNames)[0]
+    
+        return reply
+    
+    def useClassifier(self):
+        #Score a dataset
+        trainData, testData, trainLabel, testLabel = self.splitData(1)
+        pipe = Pipeline([self.PCAmodel,self.kNNmodel])
+        predictions = pipe.predict(testData)
+        
+        perfect = len(predictions)
+        assert perfect == len(testLabel)
+        score = 0
+        mistakes = {}
+        
+        for i in perfect:
+            if predictions[i] == testLabel[i]:
+                score += 1
+            else:
+                mistakes[i] = [prediction, testLabel]
+        
+        print(score/perfect)
+        
+        return mistakes
