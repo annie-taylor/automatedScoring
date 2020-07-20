@@ -4,12 +4,14 @@ import sys, os
 if not os.path.dirname(__file__) in sys.path:
     sys.path.append(os.path.dirname(__file__))
 from Session import Session
+import csv
 
 
 class Rat:
     def __init__(self,masterfolder):
         
         self.id = masterfolder.split('/')[-1]
+        print("Currently preprocessing data from %s" % self.id)
         self.pawpref = None
         
         #mapped directly to data in sessions object, key are session dates as "YYYYMMDD"
@@ -19,6 +21,7 @@ class Rat:
         score_path = masterfolder + '/' + self.id + '_scores.csv'
         self.labels = pd.read_csv(score_path)
         self.labels = self.labels.drop('Unnamed: 0', axis='columns')
+        self.keyerrors = []
         
         #Can probably move this to a separate function to make this more concise
         for folder in os.listdir(masterfolder):
@@ -48,6 +51,7 @@ class Rat:
                 except KeyError:
                     #This should only happen if there is a folder/session that exists that is unscored
                     #Update this to save any session dates (and corresponding RatID) to keep track of unscored sessions
+                    self.keyerrors.append(date)
                     print('KeyError in Rat')
                     print(fullpath)
                     print(date_form)

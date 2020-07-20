@@ -9,13 +9,16 @@ import trainingClass as tc
 import easygui as gui
 import pickle
 import os
+import pandas as pd
 
 class wrapper():
     def __init__(self):
         self.dirs = []
         self.rats = {}
         self.training = 0
-        options = ['RatClasses','Rat & Training Classes','None']
+        self.keyerrors = pd.DataFrame()
+        #Might not really need all three options, two might be enough
+        options = ['Existing rat data','Existing rat and training class data','Upload new data']
         choice = gui.choicebox(msg='Reload earlier classes?',title='Reload Dialogue',choices=options)
         if choice == options[0]:
             self.rats = pickle.load(open('rats.p','rb'))
@@ -31,14 +34,47 @@ class wrapper():
     def addRat(self):
         ## Create object with dataset
         time1 = time.time()
-        for i in range(len(self.dirs)):
-            Rat1 = Rat(self.dirs[i])
-            self.rats[Rat1.id] = Rat1
-        pickle.dump(self.rats,open('rats.p','wb'))
+        try:
+            #If rats database already exists, will add rats
+            loadrats = pickle.load(open('rats.p','rb'))
+            ids = loadrats.keys()
+            for i in range(len(self.dirs)):
+                Rat1 = Rat(self.dirs[i])
+                currentid = Rat1.id
+                self.rats[Rat1.id] = Rat1
+                if currentid not in ids:
+                    loadrats[currentid] = Rat1
+                    self.saveKeyErrors(Rat1)
+            pickle.dump(loadrats,open('rats.p','wb'))
+            self.exportKeyErrors()
+        except EOFError:
+            #If rats db does not exist, will create it
+            for i in range(len(self.dirs)):
+                Rat1 = Rat(self.dirs[i])
+                currentid = Rat1.id
+                self.rats[Rat1.id] = Rat1
+                self.saveKeyErrors(Rat1)
+            pickle.dump(self.rats,open('rats.p','wb'))
+            self.exportKeyErrors()
+            
         time2 = time.time()
-        print("Time to initialize rat: %f" % (time2-time1))
+        elapsed = time2-time1
+        minutes = int(elapsed/60)
+        seconds = elapsed - (minutes*60)
+        print("Total time for preprocessing: %d minutes %f seconds" % (minutes,seconds))
         return
 
+    def saveKeyErrors(self,Rat):
+        #This is not working properly
+        id = Rat.id
+        self.keyerrors.append({id:Rat.keyerrors},ignore_index=True)
+        return
+    
+    def exportKeyErrors(self):
+        #This is not working properly
+        (self.keyerrors).to_csv("KeyErrors.csv")
+        return
+    
     def addTrainClass(self):
         import importlib
         importlib.reload(tc)
@@ -80,10 +116,10 @@ def askParams():
     msg = "Enter parameter values:"
     title = "K-NN Classifier Parameters"
     fieldNames = ["PCA: # of dimensions","K-NN: # of neighbors","Fraction held out for test set"]
-    fieldValues = []  # we start with blanks for the values
+    fieldValues = []
     input = gui.multenterbox(msg,title, fieldNames)
     
-    # make sure that none of the fields was left blank
+    #Reloads dialog box if fields are empty
     while 1:
         if input is None: break
         errmsg = ""
@@ -91,7 +127,7 @@ def askParams():
             if input[i].strip() == "":
                 errmsg += ('"%s" is a required field.\n\n' % fieldNames[i])
         if errmsg == "":
-            break # no problems found
+            break #No fields are empty
         input = gui.multenterbox(errmsg, title, fieldNames, input)
     #Cast first two values to int, third to float
     for i in range(len(input)):
@@ -106,7 +142,7 @@ def initialAsk():
     msg = "Do you want to load an old classifier or train a new classifier?"
     title = "Start"
     fieldNames = ["Old","New"]
-    response = ""  # we start with blanks for the values
+    response = ""
     response = gui.buttonbox(msg,title, fieldNames)
     return response
 
@@ -127,7 +163,7 @@ def selectClassifier():
     
     msg = "Choose file to reload previously trained classifier"
     title = "Select classifier"
-    response = ""  # we start with blanks for the values
+    response = ""
     response = gui.buttonbox(msg,title, pickles)
     return response
     
@@ -139,7 +175,8 @@ def main():
     elif response == "New":
         wrap = wrapper()
         #Try training classifier with pca = 7 dim, knn = 3 neighbors
-        askTrainClassifier(wrap)
+        #askTrainClassifier(wrap)
+        
 
 if __name__ == '__main__':
     main()
