@@ -33,10 +33,16 @@ class Session():
                 for csv in os.listdir(subfolder):
                     if csv.endswith('.csv'):
                         csv = subfolder + '/' + csv
-                        trialNum = int(csv.split('_')[-7])
-                        import math
-                        if not math.isnan(float(labl_arr[trialNum])):
-                            self.trials[trialNum] = Trial(self, csv, trialNum, labl_arr[trialNum])
+                        try:
+                            trialNum = int(csv.split('_')[-7])
+                            import math
+                            if not math.isnan(float(labl_arr[trialNum])):
+                                self.trials[trialNum] = Trial(self, csv, trialNum, labl_arr[trialNum])
+                        except ValueError:
+                            print('ValueError in Session')
+                            print(self.rat.id)
+                            print(self.date)
+                        
                             
             if 'right' in subfolder:
                 self.rat.pawpref = 'r'
