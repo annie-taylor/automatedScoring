@@ -63,7 +63,7 @@ class wrapper():
             self.addRat()
             self.addTrainClass()
     
-    def getDirs():
+    def getDirs(self):
         time1 = time.time()
         dirselect = filedialog.Directory()
         while True:
