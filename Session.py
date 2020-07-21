@@ -28,7 +28,7 @@ class Session():
                             
             #Try not using direct view
             
-            if 'left' in subfolder:
+            if 'right' in subfolder:
                 self.rat.pawpref = 'l'
                 for csv in os.listdir(subfolder):
                     if csv.endswith('.csv'):
@@ -44,7 +44,7 @@ class Session():
                             print(self.date)
                         
                             
-            if 'right' in subfolder:
+            if 'left' in subfolder:
                 self.rat.pawpref = 'r'
                 for csv in os.listdir(subfolder):
                     if csv.endswith('.csv'):
