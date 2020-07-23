@@ -52,9 +52,9 @@ class Rat:
                     #This should only happen if there is a folder/session that exists that is unscored
                     #Update this to save any session dates (and corresponding RatID) to keep track of unscored sessions
                     self.keyerrors.append(date)
-                    print('KeyError in Rat')
-                    print(fullpath)
-                    print(date_form)
+                    #print('KeyError in Rat')
+                    #print(fullpath)
+                    #print(date_form)
         return
                 
     def trainingSet(self,prob):

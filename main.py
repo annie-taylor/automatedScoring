@@ -46,6 +46,7 @@ class wrapper():
                     loadrats[currentid] = Rat1
                     self.saveKeyErrors(Rat1)
             pickle.dump(loadrats,open('rats.p','wb'))
+            print(self.keyerrors)
             self.exportKeyErrors()
         except EOFError:
             #If rats db does not exist, will create it
@@ -55,6 +56,7 @@ class wrapper():
                 self.rats[Rat1.id] = Rat1
                 self.saveKeyErrors(Rat1)
             pickle.dump(self.rats,open('rats.p','wb'))
+            print(self.keyerrors)
             self.exportKeyErrors()
             
         time2 = time.time()
@@ -175,7 +177,7 @@ def main():
     elif response == "New":
         wrap = wrapper()
         #Try training classifier with pca = 7 dim, knn = 3 neighbors
-        #askTrainClassifier(wrap)
+        askTrainClassifier(wrap)
         
 
 if __name__ == '__main__':

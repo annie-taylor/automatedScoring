@@ -94,7 +94,6 @@ class trainingClass:
         wholeModel = {'PCA':self.PCAmodel,'kNN':self.kNNmodel}
         
         prefix = self.nameClassifier()
-        print(prefix)
         if (prefix == ''):
             picklename = 'Classifier.p'
             #print('no response')
@@ -113,9 +112,7 @@ class trainingClass:
         msg = 'Type filename for this classifier:'
         title = 'Name Classifier'
         fieldNames = ['Prefix']
-        fuckYouThisisTotallyFineHere = ''
         reply = gui.multenterbox(msg,title,fieldNames)[0]
-        print(reply)
         if reply == '':
             doubleCheck = gui.ccbox(msg='If you do not enter a prefix, file will be saved as "Classifier.p". Continue?',title='You did not enter a prefix')
             if doubleCheck:

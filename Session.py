@@ -2,46 +2,50 @@ import pandas as pd
 import numpy as np
 import os
 from Trial import Trial
+import math
 
-TEST = 'hi'
 
 class Session():
     def __init__(self, ratIn, folder, date_in, labl_arr):
         self.rat = ratIn # Rat obj. which contains session
         self.trials = {} # Dict. storing all trial obj. for this session
         self.date = date_in #Date of the session YYYYMMDD
+        self.dirPaths = {}
         
         #Currently unused
         self.laser_info = labl_arr[0]
+    
+        subfolders = os.listdir(folder)
+        for subfolder in subfolders:
+            subfolder = folder + '/' + subfolder
+            #Make list of direct view filenames
+            if 'dir' in subfolder:
+                for csv in os.listdir(subfolder):
+                    if csv.endswith('.csv'):
+                        csv = subfolder + '/' + csv
+                        trialNum = int(csv.split('_')[-7])
+                        if not math.isnan(float(labl_arr[trialNum])):
+                            self.dirPaths[trialNum] = csv
         
-        for subfolder in os.listdir(folder):
+        for subfolder in subfolders:
             subfolder = folder + '/' + subfolder
             
-            #if 'dir' in subfolder:
-            #    for csv in os.listdir(subfolder):
-            #        if csv.endswith('.csv'):
-            #            csv = subfolder + '/' + csv
-            #            trialNum = int(csv.split('_')[-7])
-            #            import math
-            #            if not math.isnan(float(labl_arr[trialNum])):
-            #                self.trials[trialNum] = Trial(self, csv, trialNum, labl_arr[trialNum])
-                            
-            #Try not using direct view
-            
+            #Check side views
             if 'right' in subfolder:
+                #L paw pref rats have camera from right side (I think.. double check this)
                 self.rat.pawpref = 'l'
                 for csv in os.listdir(subfolder):
                     if csv.endswith('.csv'):
                         csv = subfolder + '/' + csv
                         try:
                             trialNum = int(csv.split('_')[-7])
-                            import math
                             if not math.isnan(float(labl_arr[trialNum])):
                                 self.trials[trialNum] = Trial(self, csv, trialNum, labl_arr[trialNum])
                         except ValueError:
                             print('ValueError in Session')
                             print(self.rat.id)
                             print(self.date)
+                            print(trialNum)
                         
                             
             if 'left' in subfolder:
@@ -49,10 +53,14 @@ class Session():
                 for csv in os.listdir(subfolder):
                     if csv.endswith('.csv'):
                         csv = subfolder + '/' + csv
-                        trialNum = int(csv.split('_')[-7])
-                        import math
-                        if not math.isnan(float(labl_arr[trialNum])):
-                            self.trials[trialNum] = Trial(self, csv, trialNum, labl_arr[trialNum])
+                        try:
+                            trialNum = int(csv.split('_')[-7])
+                            if not math.isnan(float(labl_arr[trialNum])):
+                                self.trials[trialNum] = Trial(self, csv, trialNum, labl_arr[trialNum])
+                        except ValueError:
+                            print('ValueError in Session')
+                            print(self.rat.id)
+                            print(self.date)
             
     def dimReduction(self,n_components,n_trials):
         #Currently unused, moved to super class
