@@ -73,7 +73,19 @@ class Trial():
                 'nose':'sidenosex','nose.1':'sidenosey','nose.2':'sidenosep',
                 'pellet':'sidepelletx','pellet.1':'sidepellety','pellet.2':'sidepelletp',
                                          })
-        self.addDirectView()
+        if self.session.rat.view == 'both':
+            self.addDirectView()
+        elif self.session.rat.view == 'direct':
+            self.addDirectView()
+            columnNames = self.data.columns
+            drops = []
+            #remove all side view data (in future, modify this to not import unused data, save time)
+            for i in columnNames:
+                if 'side' in i:
+                    drops.append(i)
+            self.data = self.data.drop(drops,axis='columns')
+        elif self.session.rat.view == 'side':
+            continue
         self.data = self.data.drop('bodyparts',axis='columns')
         self.modifiedData = self.data.copy() # Will be used to save data after origin shift
         # Both standardScale and smoothProb() change modifiedData alone
@@ -97,104 +109,112 @@ class Trial():
         #Calls "getPelletLoc" to find average initial pellet location
         #Scales all coordinates in trial by initial pellet location
         #Also updates the "pawpref" attribute for the rat if not yet determined
-        [sidepelletX, sidepelletY, dirpelletX, dirpelletY] = self.getPelletLoc()
+        if self.session.rat.view == 'both':
+            [sidepelletX, sidepelletY] = self.getPelletLoc('side')
+            [dirpelletX, dirpelletY] = self.getPelletLoc('direct')
+        elif self.session.rat.view == 'side':
+            [sidepelletX, sidepelletY] = self.getPelletLoc('side')
+        elif self.session.rat.view == 'direct':
+            [dirpelletX, dirpelletY] = self.getPelletLoc('direct')
         
-        #try:
-        #Shift X
-        #If left pawed
-        self.modifiedData.sidemcp1x = self.data.sidemcp1x - sidepelletX
-        self.modifiedData.sidemcp2x = self.data.sidemcp2x - sidepelletX
-        self.modifiedData.sidemcp3x = self.data.sidemcp3x - sidepelletX
-        self.modifiedData.sidemcp4x = self.data.sidemcp4x - sidepelletX
+        if (self.session.rat.view == 'both') or (self.session.rat.view == 'side):
+            #Shift X
+            #If left pawed
+            self.modifiedData.sidemcp1x = self.data.sidemcp1x - sidepelletX
+            self.modifiedData.sidemcp2x = self.data.sidemcp2x - sidepelletX
+            self.modifiedData.sidemcp3x = self.data.sidemcp3x - sidepelletX
+            self.modifiedData.sidemcp4x = self.data.sidemcp4x - sidepelletX
 
-        self.modifiedData.sidepip1x = self.data.sidepip1x - sidepelletX
-        self.modifiedData.sidepip2x = self.data.sidepip2x - sidepelletX
-        self.modifiedData.sidepip3x = self.data.sidepip3x - sidepelletX
-        self.modifiedData.sidepip4x = self.data.sidepip4x - sidepelletX
+            self.modifiedData.sidepip1x = self.data.sidepip1x - sidepelletX
+            self.modifiedData.sidepip2x = self.data.sidepip2x - sidepelletX
+            self.modifiedData.sidepip3x = self.data.sidepip3x - sidepelletX
+            self.modifiedData.sidepip4x = self.data.sidepip4x - sidepelletX
 
-        self.modifiedData.sidedigit1x = self.data.sidedigit1x - sidepelletX
-        self.modifiedData.sidedigit2x = self.data.sidedigit2x - sidepelletX
-        self.modifiedData.sidedigit3x = self.data.sidedigit3x - sidepelletX
-        self.modifiedData.sidedigit4x = self.data.sidedigit4x - sidepelletX
+            self.modifiedData.sidedigit1x = self.data.sidedigit1x - sidepelletX
+            self.modifiedData.sidedigit2x = self.data.sidedigit2x - sidepelletX
+            self.modifiedData.sidedigit3x = self.data.sidedigit3x - sidepelletX
+            self.modifiedData.sidedigit4x = self.data.sidedigit4x - sidepelletX
 
-        #Always
-        self.modifiedData.sidepawdorsumx = self.data.sidepawdorsumx - sidepelletX
-        self.modifiedData.sidenosex = self.data.sidenosex - sidepelletX
-        self.modifiedData.sidepelletx = self.data.sidepelletx - sidepelletX
-        self.modifiedData.sidecontrapawdorsumx = self.data.sidecontrapawdorsumx - sidepelletX
+            #Always
+            self.modifiedData.sidepawdorsumx = self.data.sidepawdorsumx - sidepelletX
+            self.modifiedData.sidenosex = self.data.sidenosex - sidepelletX
+            self.modifiedData.sidepelletx = self.data.sidepelletx - sidepelletX
+            self.modifiedData.sidecontrapawdorsumx = self.data.sidecontrapawdorsumx - sidepelletX
 
-        #Shift Y
-        #If left pawed
-        self.modifiedData.sidemcp1y = self.data.sidemcp1y - sidepelletY
-        self.modifiedData.sidemcp2y = self.data.sidemcp2y - sidepelletY
-        self.modifiedData.sidemcp3y = self.data.sidemcp3y - sidepelletY
-        self.modifiedData.sidemcp4y = self.data.sidemcp4y - sidepelletY
+            #Shift Y
+            #If left pawed
+            self.modifiedData.sidemcp1y = self.data.sidemcp1y - sidepelletY
+            self.modifiedData.sidemcp2y = self.data.sidemcp2y - sidepelletY
+            self.modifiedData.sidemcp3y = self.data.sidemcp3y - sidepelletY
+            self.modifiedData.sidemcp4y = self.data.sidemcp4y - sidepelletY
 
-        self.modifiedData.sidepip1y = self.data.sidepip1y - sidepelletY
-        self.modifiedData.sidepip2y = self.data.sidepip2y - sidepelletY
-        self.modifiedData.sidepip3y = self.data.sidepip3y - sidepelletY
-        self.modifiedData.sidepip4y = self.data.sidepip4y - sidepelletY
+            self.modifiedData.sidepip1y = self.data.sidepip1y - sidepelletY
+            self.modifiedData.sidepip2y = self.data.sidepip2y - sidepelletY
+            self.modifiedData.sidepip3y = self.data.sidepip3y - sidepelletY
+            self.modifiedData.sidepip4y = self.data.sidepip4y - sidepelletY
 
-        self.modifiedData.sidedigit1y = self.data.sidedigit1y - sidepelletY
-        self.modifiedData.sidedigit2y = self.data.sidedigit2y - sidepelletY
-        self.modifiedData.sidedigit3y = self.data.sidedigit3y - sidepelletY
-        self.modifiedData.sidedigit4y = self.data.sidedigit4y - sidepelletY
+            self.modifiedData.sidedigit1y = self.data.sidedigit1y - sidepelletY
+            self.modifiedData.sidedigit2y = self.data.sidedigit2y - sidepelletY
+            self.modifiedData.sidedigit3y = self.data.sidedigit3y - sidepelletY
+            self.modifiedData.sidedigit4y = self.data.sidedigit4y - sidepelletY
 
-        #always
-        self.modifiedData.sidepawdorsumy = self.data.sidepawdorsumy - sidepelletY
-        self.modifiedData.sidenosey = self.data.sidenosey - sidepelletY
-        self.modifiedData.sidepellety = self.data.sidepellety - sidepelletY
-        self.modifiedData.sidecontrapawdorsumy = self.data.sidecontrapawdorsumy - sidepelletY
+            #always
+            self.modifiedData.sidepawdorsumy = self.data.sidepawdorsumy - sidepelletY
+            self.modifiedData.sidenosey = self.data.sidenosey - sidepelletY
+            self.modifiedData.sidepellety = self.data.sidepellety - sidepelletY
+            self.modifiedData.sidecontrapawdorsumy = self.data.sidecontrapawdorsumy - sidepelletY
         
-        # Same as above but for direct view
-        # Need to have a separate pelletOrigin function for direct and side views
-        
-        #Shift X
-        #If left pawed
-        self.modifiedData.dirmcp1x = self.data.dirmcp1x - dirpelletX
-        self.modifiedData.dirmcp2x = self.data.dirmcp2x - dirpelletX
-        self.modifiedData.dirmcp3x = self.data.dirmcp3x - dirpelletX
-        self.modifiedData.dirmcp4x = self.data.dirmcp4x - dirpelletX
-        
-        self.modifiedData.dirpip1x = self.data.dirpip1x - dirpelletX
-        self.modifiedData.dirpip2x = self.data.dirpip2x - dirpelletX
-        self.modifiedData.dirpip3x = self.data.dirpip3x - dirpelletX
-        self.modifiedData.dirpip4x = self.data.dirpip4x - dirpelletX
-
-        self.modifiedData.dirdigit1x = self.data.dirdigit1x - dirpelletX
-        self.modifiedData.dirdigit2x = self.data.dirdigit2x - dirpelletX
-        self.modifiedData.dirdigit3x = self.data.dirdigit3x - dirpelletX
-        self.modifiedData.dirdigit4x = self.data.dirdigit4x - dirpelletX
-
-        #Always
-        self.modifiedData.dirpawdorsumx = self.data.dirpawdorsumx - dirpelletX
-        self.modifiedData.dirnosex = self.data.dirnosex - dirpelletX
-        self.modifiedData.dirpelletx = self.data.dirpelletx - dirpelletX
-        self.modifiedData.dircontrapawdorsumx = self.data.dircontrapawdorsumx - dirpelletX
-
-        #Shift Y
-        #If left pawed
-        self.modifiedData.dirmcp1y = self.data.dirmcp1y - dirpelletY
-        self.modifiedData.dirmcp2y = self.data.dirmcp2y - dirpelletY
-        self.modifiedData.dirmcp3y = self.data.dirmcp3y - dirpelletY
-        self.modifiedData.dirmcp4y = self.data.dirmcp4y - dirpelletY
-
-        self.modifiedData.dirpip1y = self.data.dirpip1y - dirpelletY
-        self.modifiedData.dirpip2y = self.data.dirpip2y - dirpelletY
-        self.modifiedData.dirpip3y = self.data.dirpip3y - dirpelletY
-        self.modifiedData.dirpip4y = self.data.dirpip4y - dirpelletY
-
-        self.modifiedData.dirdigit1y = self.data.dirdigit1y - dirpelletY
-        self.modifiedData.dirdigit2y = self.data.dirdigit2y - dirpelletY
-        self.modifiedData.dirdigit3y = self.data.dirdigit3y - dirpelletY
-        self.modifiedData.dirdigit4y = self.data.dirdigit4y - dirpelletY
-        
-        #always
-        self.modifiedData.dirpawdorsumy = self.data.dirpawdorsumy - dirpelletY
-        self.modifiedData.dirnosey = self.data.dirnosey - dirpelletY
-        self.modifiedData.dirpellety = self.data.dirpellety - dirpelletY
-        self.modifiedData.dircontrapawdorsumy = self.data.dircontrapawdorsumy - dirpelletY
+       
+        if (self.session.rat.view == 'both') or (self.session.rat.view == 'direct'):
+            # Same as above but for direct view
+            # Need to have a separate pelletOrigin function for direct and side views
             
+            #Shift X
+            #If left pawed
+            self.modifiedData.dirmcp1x = self.data.dirmcp1x - dirpelletX
+            self.modifiedData.dirmcp2x = self.data.dirmcp2x - dirpelletX
+            self.modifiedData.dirmcp3x = self.data.dirmcp3x - dirpelletX
+            self.modifiedData.dirmcp4x = self.data.dirmcp4x - dirpelletX
+            
+            self.modifiedData.dirpip1x = self.data.dirpip1x - dirpelletX
+            self.modifiedData.dirpip2x = self.data.dirpip2x - dirpelletX
+            self.modifiedData.dirpip3x = self.data.dirpip3x - dirpelletX
+            self.modifiedData.dirpip4x = self.data.dirpip4x - dirpelletX
+
+            self.modifiedData.dirdigit1x = self.data.dirdigit1x - dirpelletX
+            self.modifiedData.dirdigit2x = self.data.dirdigit2x - dirpelletX
+            self.modifiedData.dirdigit3x = self.data.dirdigit3x - dirpelletX
+            self.modifiedData.dirdigit4x = self.data.dirdigit4x - dirpelletX
+
+            #Always
+            self.modifiedData.dirpawdorsumx = self.data.dirpawdorsumx - dirpelletX
+            self.modifiedData.dirnosex = self.data.dirnosex - dirpelletX
+            self.modifiedData.dirpelletx = self.data.dirpelletx - dirpelletX
+            self.modifiedData.dircontrapawdorsumx = self.data.dircontrapawdorsumx - dirpelletX
+
+            #Shift Y
+            #If left pawed
+            self.modifiedData.dirmcp1y = self.data.dirmcp1y - dirpelletY
+            self.modifiedData.dirmcp2y = self.data.dirmcp2y - dirpelletY
+            self.modifiedData.dirmcp3y = self.data.dirmcp3y - dirpelletY
+            self.modifiedData.dirmcp4y = self.data.dirmcp4y - dirpelletY
+
+            self.modifiedData.dirpip1y = self.data.dirpip1y - dirpelletY
+            self.modifiedData.dirpip2y = self.data.dirpip2y - dirpelletY
+            self.modifiedData.dirpip3y = self.data.dirpip3y - dirpelletY
+            self.modifiedData.dirpip4y = self.data.dirpip4y - dirpelletY
+
+            self.modifiedData.dirdigit1y = self.data.dirdigit1y - dirpelletY
+            self.modifiedData.dirdigit2y = self.data.dirdigit2y - dirpelletY
+            self.modifiedData.dirdigit3y = self.data.dirdigit3y - dirpelletY
+            self.modifiedData.dirdigit4y = self.data.dirdigit4y - dirpelletY
+            
+            #always
+            self.modifiedData.dirpawdorsumy = self.data.dirpawdorsumy - dirpelletY
+            self.modifiedData.dirnosey = self.data.dirnosey - dirpelletY
+            self.modifiedData.dirpellety = self.data.dirpellety - dirpelletY
+            self.modifiedData.dircontrapawdorsumy = self.data.dircontrapawdorsumy - dirpelletY
+                
         return self
     
     def addDirectView(self):
@@ -272,71 +292,72 @@ class Trial():
         self.data = self.data.join(dirDf)
         return
     
-    def getPelletLoc(self):
+    def getPelletLoc(self,view):
     # Averages first 10 coordinates of pellet with likelihood of 1 to get initial location
     # Also ensures that the pellet location is not changing (e.g. if pedestal is still rising)
         
-        isChanging = True
-        pelletLoc = 0
-        firstTenX = []
-        runningSumX = 0
-        firstTenY = []
-        runningSumY = 0
-        #For side view
-        l = len(self.data.sidepelletp)
-        for i in range(l):
-            x = self.data.sidepelletx[i+1]
-            y = self.data.sidepellety[i+1]
-            p = self.data.sidepelletp[i+1]
-            x2 = self.data.sidepelletx[i+2]
-            y2 = self.data.sidepellety[i+2]
-            if ((x2 - x)<5) or ((y2-y)<5):
-                #Make sure the pellet is not still moving at the beginning of the trial
-                isChanging = False
-            if not isChanging:
-                if len(firstTenX) > 9:
-                    break
-                if not (p == 'likelihood'):
-                    if (float(i)  > .99):
-                        if not (x == 'x'):
-                            firstTenX.append(x)
-                            runningSumX = runningSumX + float(x)
-                        if not (y == 'y'):
-                            firstTenY.append(y)
-                            runningSumY = runningSumY + float(y)
-        sidepelletLoc = [runningSumX/10, runningSumY/10]
+        if view == 'side':
+            isChanging = True
+            pelletLoc = 0
+            firstTenX = []
+            runningSumX = 0
+            firstTenY = []
+            runningSumY = 0
+            #For side view
+            l = len(self.data.sidepelletp)
+            for i in range(l):
+                x = self.data.sidepelletx[i+1]
+                y = self.data.sidepellety[i+1]
+                p = self.data.sidepelletp[i+1]
+                x2 = self.data.sidepelletx[i+2]
+                y2 = self.data.sidepellety[i+2]
+                if ((x2 - x)<5) or ((y2-y)<5):
+                    #Make sure the pellet is not still moving at the beginning of the trial
+                    isChanging = False
+                if not isChanging:
+                    if len(firstTenX) > 9:
+                        break
+                    if not (p == 'likelihood'):
+                        if (float(i)  > .99):
+                            if not (x == 'x'):
+                                firstTenX.append(x)
+                                runningSumX = runningSumX + float(x)
+                            if not (y == 'y'):
+                                firstTenY.append(y)
+                                runningSumY = runningSumY + float(y)
+            pelletLoc = [runningSumX/10, runningSumY/10]
         
-        isChanging = True
-        pelletLoc = 0
-        firstTenX = []
-        runningSumX = 0
-        firstTenY = []
-        runningSumY = 0
-        #For direct view
-        l = len(self.data.dirpelletp)
-        for i in range(l):
-            x = self.data.dirpelletx[i+1]
-            y = self.data.dirpellety[i+1]
-            p = self.data.dirpelletp[i+1]
-            x2 = self.data.dirpelletx[i+2]
-            y2 = self.data.dirpellety[i+2]
-            if ((x2 - x)<5) or ((y2-y)<5):
-                #Make sure the pellet is not still moving at the beginning of the trial
-                isChanging = False
-            if not isChanging:
-                if len(firstTenX) > 9:
-                    break
-                if not (p == 'likelihood'):
-                    if (float(i)  > .99):
-                        if not (x == 'x'):
-                            firstTenX.append(x)
-                            runningSumX = runningSumX + float(x)
-                        if not (y == 'y'):
-                            firstTenY.append(y)
-                            runningSumY = runningSumY + float(y)
-        dirPelletLoc = [runningSumX/10, runningSumY/10]
+       if view == 'direct':
+            isChanging = True
+            pelletLoc = 0
+            firstTenX = []
+            runningSumX = 0
+            firstTenY = []
+            runningSumY = 0
+            #For direct view
+            l = len(self.data.dirpelletp)
+            for i in range(l):
+                x = self.data.dirpelletx[i+1]
+                y = self.data.dirpellety[i+1]
+                p = self.data.dirpelletp[i+1]
+                x2 = self.data.dirpelletx[i+2]
+                y2 = self.data.dirpellety[i+2]
+                if ((x2 - x)<5) or ((y2-y)<5):
+                    #Make sure the pellet is not still moving at the beginning of the trial
+                    isChanging = False
+                if not isChanging:
+                    if len(firstTenX) > 9:
+                        break
+                    if not (p == 'likelihood'):
+                        if (float(i)  > .99):
+                            if not (x == 'x'):
+                                firstTenX.append(x)
+                                runningSumX = runningSumX + float(x)
+                            if not (y == 'y'):
+                                firstTenY.append(y)
+                                runningSumY = runningSumY + float(y)
+            pelletLoc = [runningSumX/10, runningSumY/10]
         
-        pelletLoc = sidepelletLoc + dirPelletLoc
         return pelletLoc
     
     def shuffleFrames(self):

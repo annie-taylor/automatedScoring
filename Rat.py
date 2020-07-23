@@ -8,11 +8,12 @@ import csv
 
 
 class Rat:
-    def __init__(self,masterfolder):
+    def __init__(self,masterfolder,view):
         
         self.id = masterfolder.split('/')[-1]
         print("Currently preprocessing data from %s" % self.id)
         self.pawpref = None
+        self.view = view
         
         #mapped directly to data in sessions object, key are session dates as "YYYYMMDD"
         #data = unmodified

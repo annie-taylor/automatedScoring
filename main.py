@@ -11,7 +11,7 @@ import pickle
 import os
 import pandas as pd
 
-class wrapper():
+class wrapper(view):
     def __init__(self):
         self.dirs = []
         self.rats = {}
@@ -28,10 +28,10 @@ class wrapper():
             self.training = pickle.load(open('trainingClass.p','rb'))
         elif choice == options[2]:
             self.getDirs()
-            self.addRat()
+            self.addRat(view)
             self.addTrainClass()
             
-    def addRat(self):
+    def addRat(self,view):
         ## Create object with dataset
         time1 = time.time()
         try:
@@ -39,7 +39,7 @@ class wrapper():
             loadrats = pickle.load(open('rats.p','rb'))
             ids = loadrats.keys()
             for i in range(len(self.dirs)):
-                Rat1 = Rat(self.dirs[i])
+                Rat1 = Rat(self.dirs[i],view)
                 currentid = Rat1.id
                 self.rats[Rat1.id] = Rat1
                 if currentid not in ids:
@@ -51,7 +51,7 @@ class wrapper():
         except EOFError:
             #If rats db does not exist, will create it
             for i in range(len(self.dirs)):
-                Rat1 = Rat(self.dirs[i])
+                Rat1 = Rat(self.dirs[i],view)
                 currentid = Rat1.id
                 self.rats[Rat1.id] = Rat1
                 self.saveKeyErrors(Rat1)
@@ -175,7 +175,7 @@ def main():
         filename = selectClassifier()
         print(filename)
     elif response == "New":
-        wrap = wrapper()
+        wrap = wrapper('both')
         #Try training classifier with pca = 7 dim, knn = 3 neighbors
         askTrainClassifier(wrap)
         
