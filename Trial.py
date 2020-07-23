@@ -75,8 +75,10 @@ class Trial():
                                          })
         if self.session.rat.view == 'both':
             self.addDirectView()
+            self.data = self.data.drop('bodyparts',axis='columns')
         elif self.session.rat.view == 'direct':
             self.addDirectView()
+            self.data = self.data.drop('bodyparts',axis='columns')
             columnNames = self.data.columns
             drops = []
             #remove all side view data (in future, modify this to not import unused data, save time)
@@ -84,9 +86,7 @@ class Trial():
                 if 'side' in i:
                     drops.append(i)
             self.data = self.data.drop(drops,axis='columns')
-        elif self.session.rat.view == 'side':
-            continue
-        self.data = self.data.drop('bodyparts',axis='columns')
+        #Continues normally if view is 'side'
         self.modifiedData = self.data.copy() # Will be used to save data after origin shift
         # Both standardScale and smoothProb() change modifiedData alone
         self.pelletOrigin()
@@ -117,7 +117,7 @@ class Trial():
         elif self.session.rat.view == 'direct':
             [dirpelletX, dirpelletY] = self.getPelletLoc('direct')
         
-        if (self.session.rat.view == 'both') or (self.session.rat.view == 'side):
+        if (self.session.rat.view == 'both') or (self.session.rat.view == 'side'):
             #Shift X
             #If left pawed
             self.modifiedData.sidemcp1x = self.data.sidemcp1x - sidepelletX
@@ -327,7 +327,7 @@ class Trial():
                                 runningSumY = runningSumY + float(y)
             pelletLoc = [runningSumX/10, runningSumY/10]
         
-       if view == 'direct':
+        if view == 'direct':
             isChanging = True
             pelletLoc = 0
             firstTenX = []
@@ -431,16 +431,29 @@ class Trial():
 
     def dropProb(self):
         #Now that probability has been incorporated, drop probability values
-        self.modifiedData = self.modifiedData.drop(['sidemcp1p','sidemcp2p','sidemcp3p','sidemcp4p',
-        'sidepip1p','sidepip2p','sidepip3p','sidepip4p',
-        'sidedigit1p','sidedigit2p','sidedigit3p','sidedigit4p',
-        'sidepawdorsump','sidenosep','sidepelletp','sidecontrapawdorsump',
-        'dirmcp1p','dirmcp2p','dirmcp3p','dirmcp4p',
-        'dirpip1p','dirpip2p','dirpip3p','dirpip4p',
-        'dirdigit1p','dirdigit2p','dirdigit3p','dirdigit4p',
-        'dirpawdorsump','dirnosep','dirpelletp','dircontrapawdorsump'],
-        axis='columns')
-    
+        if self.session.rat.view == 'both':
+            self.modifiedData = self.modifiedData.drop(['sidemcp1p','sidemcp2p','sidemcp3p','sidemcp4p',
+            'sidepip1p','sidepip2p','sidepip3p','sidepip4p',
+            'sidedigit1p','sidedigit2p','sidedigit3p','sidedigit4p',
+            'sidepawdorsump','sidenosep','sidepelletp','sidecontrapawdorsump',
+            'dirmcp1p','dirmcp2p','dirmcp3p','dirmcp4p',
+            'dirpip1p','dirpip2p','dirpip3p','dirpip4p',
+            'dirdigit1p','dirdigit2p','dirdigit3p','dirdigit4p',
+            'dirpawdorsump','dirnosep','dirpelletp','dircontrapawdorsump'],
+            axis='columns')
+        elif self.session.rat.view == 'side':
+            self.modifiedData = self.modifiedData.drop(['sidemcp1p','sidemcp2p','sidemcp3p','sidemcp4p',
+            'sidepip1p','sidepip2p','sidepip3p','sidepip4p',
+            'sidedigit1p','sidedigit2p','sidedigit3p','sidedigit4p',
+            'sidepawdorsump','sidenosep','sidepelletp'],
+            axis='columns')
+        elif self.session.rat.view == 'direct':
+            self.modifiedData = self.modifiedData.drop([
+            'dirmcp1p','dirmcp2p','dirmcp3p','dirmcp4p',
+            'dirpip1p','dirpip2p','dirpip3p','dirpip4p',
+            'dirdigit1p','dirdigit2p','dirdigit3p','dirdigit4p',
+            'dirpawdorsump','dirnosep','dirpelletp','dircontrapawdorsump'],
+            axis='columns')
         return
     
     def plotTrajectories(self,bodyPart,showProb):
