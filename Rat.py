@@ -11,7 +11,7 @@ class Rat:
     def __init__(self,masterfolder,view):
         
         self.id = masterfolder.split('/')[-1]
-        print("Currently preprocessing data from %s" % self.id)
+        print("Currently preprocessing data from %s..." % self.id)
         self.pawpref = None
         self.view = view
         
@@ -56,53 +56,8 @@ class Rat:
                     #print('KeyError in Rat')
                     #print(fullpath)
                     #print(date_form)
-        return
-                
-    def trainingSet(self,prob):
-        #Keep this until trainingClass is completely functional
-        #At the moment this is not being used at all
-        
-        #Generate training data and labels from a rat class
-        #Outputs trainingData and trainingLabels as lists of dataframes
-        #Will either keep (prob = 1) or omit (prob = 0) probabilities depending on value of 'prob'
 
-        fitData = []
-        fitLabels = []
-        
-        for date in self.sessions:
-            session = self.sessions[date].trials
-            
-            if not prob:
-                for trialNum in session:
-                    self.sessions[date].trials[trialNum].smoothProb()
-                    if self.pawpref == 'l':
-                        self.sessions[date].trials[trialNum].data.drop(['leftmcp1p','leftmcp2p','leftmcp3p','leftmcp4p',
-                                                 'leftpip1p','leftpip2p','leftpip3p','leftpip4p',
-                                                 'leftdigit1p','leftdigit2p','leftdigit3p','leftdigit4p',
-                                                 'leftpawdorsump','nosep','pelletp','rightpawdorsump'],
-                                                axis='columns')
-                    elif self.pawpref == 'r':
-                        self.sessions[date].trials[trialNum].data.drop(['rightmcp1p','rightmcp2p','rightmcp3p','rightmcp4p',
-                                                 'rightpip1p','rightpip2p','rightpip3p','rightpip4p',
-                                                 'rightdigit1p','rightdigit2p','rightdigit3p','rightdigit4p',
-                                                 'leftpawdorsump','nosep','pelletp','rightpawdorsump'],
-                                                axis='columns')
-            else:
-                for trialNum in session:
-                    self.sessions[date].trials[trialNum].smoothProb()
-                    
-            decompFeatures, labels = self.sessions[date].dimReduction(3,1)
-            
-            for trial in decompFeatures:
-                trialAr = np.concatenate((trial[:,0], trial[:,1], trial[:,2]))
-                fitData.append(trialAr)
-                
-            for label in labels:
-                fitLabels.append(label)
-                
-        trainData, testData, trainLabel, testLabel = train_test_split(fitData, fitLabels, test_size=0.33)
-        return trainData, testData, trainLabel, testLabel
-    
+
     def sortByLabel(self,givenlabel):
         #Currently unused, consider using this to plot an "average" trajectory if would be helpful
         
