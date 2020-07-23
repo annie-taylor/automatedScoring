@@ -109,18 +109,19 @@ class trainingClass:
         return
         
     def nameClassifier(self):
-        msg = 'Type filename for this classifier:'
-        title = 'Name Classifier'
-        fieldNames = ['Prefix']
-        reply = gui.multenterbox(msg,title,fieldNames)[0]
+        msg = 'Type filename for this classifier: '
+        reply = input(msg)
+        #title = 'Name Classifier'
+        #fieldNames = ['Prefix']
+        #reply = gui.multenterbox(msg,title,fieldNames)[0]
         if reply == '':
-            doubleCheck = gui.ccbox(msg='If you do not enter a prefix, file will be saved as "Classifier.p". Continue?',title='You did not enter a prefix')
-            if doubleCheck:
-                reply = ['']
-                print('no response')
+            #doubleCheck = gui.ccbox(msg='If you do not enter a prefix, file will be saved as "Classifier.p". Continue?',title='You did not enter a prefix')
+            doubleCheck = input('If you do not enter a prefix, file will be saved as "Classifier.p" - continue? (y/n): ')
+            if doubleCheck == 'y':
+                reply = ''
                 pass
             else:
-                reply = gui.multenterbox(msg,title,fieldNames)[0]
+                reply = input(msg)
     
         return reply
     
