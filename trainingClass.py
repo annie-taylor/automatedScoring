@@ -80,7 +80,7 @@ class trainingClass:
         #saves parameters for both as attributes of trainingClass
         #prints training and test score for the classifier
         pipe = Pipeline([('ipca', IncrementalPCA(n_components = n_components)),
-                        ('knn', BaggingClassifier(base_estimator=kNN(n_neighbors = n_neighbors,weights = 'distance'),n_estimators=5))] )
+                        ('knn', BaggingClassifier(base_estimator=kNN(n_neighbors = n_neighbors,weights = 'distance'),n_estimators=5))],verbose=True )
         trainData, testData, trainLabel, testLabel = self.splitData(test_frac)
         pipe.fit(trainData,trainLabel)
         
