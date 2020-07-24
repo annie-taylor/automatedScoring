@@ -215,7 +215,7 @@ class Trial():
             self.modifiedData.dirpellety = self.data.dirpellety - dirpelletY
             self.modifiedData.dircontrapawdorsumy = self.data.dircontrapawdorsumy - dirpelletY
                 
-        return self
+        return
     
     def addDirectView(self):
     
