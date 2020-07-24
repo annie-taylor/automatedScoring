@@ -11,24 +11,30 @@ import pickle
 import os
 import pandas as pd
 
-class wrapper(view):
+class wrapper():
     def __init__(self):
         self.dirs = []
         self.rats = {}
         self.training = 0
         self.keyerrors = pd.DataFrame()
         #Might not really need all three options, two might be enough
-        options = ['Existing rat data','Existing rat and training class data','Upload new data']
-        choice = gui.choicebox(msg='Reload earlier classes?',title='Reload Dialogue',choices=options)
-        if choice == options[0]:
+        #options = ['Existing rat data','Existing rat and training class data','Upload new data']
+        choice = input('Reload old data or upload new data? (old/new): ')
+        choice = choice.lower()
+        #choice = gui.choicebox(msg='Reload earlier classes?',title='Reload Dialogue',choices=options)
+        if choice == 'old':
             self.rats = pickle.load(open('rats.p','rb'))
+            print('Building trainingClass object...')
             self.addTrainClass()
-        elif choice == options[1]:
-            self.rats = pickle.load(open('rats.p','rb'))
-            self.training = pickle.load(open('trainingClass.p','rb'))
-        elif choice == options[2]:
+        #elif choice == 2:
+        #    self.rats = pickle.load(open('rats.p','rb'))
+        #    self.training = pickle.load(open('trainingClass.p','rb'))
+        elif choice == 'new':
+            print('Opening window to select files...')
             self.getDirs()
+            view = input('Do you want to incorporate direct view, side view, or both (type direct/side/both): ')
             self.addRat(view)
+            print('Building trainingClass object...')
             self.addTrainClass()
             
     def addRat(self,view):
@@ -46,9 +52,8 @@ class wrapper(view):
                     loadrats[currentid] = Rat1
                     self.saveKeyErrors(Rat1)
             pickle.dump(loadrats,open('rats.p','wb'))
-            print(self.keyerrors)
             self.exportKeyErrors()
-        except EOFError:
+        except FileNotFoundError:
             #If rats db does not exist, will create it
             for i in range(len(self.dirs)):
                 Rat1 = Rat(self.dirs[i],view)
@@ -56,14 +61,12 @@ class wrapper(view):
                 self.rats[Rat1.id] = Rat1
                 self.saveKeyErrors(Rat1)
             pickle.dump(self.rats,open('rats.p','wb'))
-            print(self.keyerrors)
             self.exportKeyErrors()
-            
         time2 = time.time()
         elapsed = time2-time1
         minutes = int(elapsed/60)
         seconds = elapsed - (minutes*60)
-        print("Total time for preprocessing: %d minutes %f seconds" % (minutes,seconds))
+        print("Total time for preprocessing: %d minutes %d seconds" % (minutes,seconds))
         return
 
     def saveKeyErrors(self,Rat):
@@ -78,82 +81,73 @@ class wrapper(view):
         return
     
     def addTrainClass(self):
-        import importlib
-        importlib.reload(tc)
         #Test trainingSet methods
         time1 = time.time()
         ratList = self.rats.values()
         self.training = tc.trainingClass(ratList)
         pickle.dump(self.training,open('trainingClass.p','wb'))
         time2 = time.time()
-        print("Time to initialize trainingClass: %f" % (time2-time1))
+        #print("Time to build trainingClass object: %f" % (time2-time1))
         return
         
     def reload(self):
-        options = ['RatClasses','Rat & Training Classes','None']
-        choice = gui.choicebox(msg='Reload earlier classes?',title='Reload Dialogue',choices=options)
-        if choice == options[0]:
+        #options = ['RatClasses','Rat & Training Classes','None']
+        #choice = gui.choicebox(msg='Reload earlier classes?',title='Reload Dialogue',choices=options)
+        choice = input('Reload old data or upload new data? (old/new): ')
+        choice = choice.lower()
+        if choice == 'old':
             self.rats = pickle.load(open('rats.p','rb'))
-        elif choice == options[1]:
-            self.rats = pickle.load(open('rats.p','rb'))
-            self.training = pickle.load(open('trainingClass.p','rb'))
-        elif choice == options[2]:
+        #elif choice == options[1]:
+         #   self.rats = pickle.load(open('rats.p','rb'))
+         #   self.training = pickle.load(open('trainingClass.p','rb'))
+        elif choice == 'new':
             self.addRat()
             self.addTrainClass()
     
     def getDirs(self):
         time1 = time.time()
+        #get rid of that little annoying tk window
+        root = Tk()
+        root.withdraw()
+        #do the thing
         dirselect = filedialog.Directory()
         while True:
             # Can modify this to req. people type in directories instead?
             # Like in BSOID?
-            d = dirselect.show(initialdir = "/Volumes/SharedX/Neuro-Leventhal/data/Skilled Reaching/DLC output",title = "Select rat folder")
+            d = dirselect.show(initialdir = "/Volumes/",title = "Select rat folder")
             if not d: break
             self.dirs.append(d)
-        Tk().withdraw()
         time2 = time.time()
-        print("Time to save pathnames: %f" % (time2-time1))
+        print("Time to save pathnames: %d seconds" % (time2-time1))
 
 def askParams():
-    msg = "Enter parameter values:"
-    title = "K-NN Classifier Parameters"
-    fieldNames = ["PCA: # of dimensions","K-NN: # of neighbors","Fraction held out for test set"]
-    fieldValues = []
-    input = gui.multenterbox(msg,title, fieldNames)
     
-    #Reloads dialog box if fields are empty
-    while 1:
-        if input is None: break
-        errmsg = ""
-        for i in range(len(fieldNames)):
-            if input[i].strip() == "":
-                errmsg += ('"%s" is a required field.\n\n' % fieldNames[i])
-        if errmsg == "":
-            break #No fields are empty
-        input = gui.multenterbox(errmsg, title, fieldNames, input)
-    #Cast first two values to int, third to float
-    for i in range(len(input)):
-        if (i == 0) or (i == 1):
-            fieldValues.append(int(input[i]))
-        else:
-            fieldValues.append(float(input[i]))
-    print("Reply was: %s" % str(fieldValues))
-    return fieldValues
+    pca = int(input("PCA: # of dimensions: "))
+    knn = int(input("K-NN: # of neighbors: "))
+    frac = float(input("Fraction held out for test set: "))
+    
+    values = [pca,knn,frac]
+    return values
  
 def initialAsk():
-    msg = "Do you want to load an old classifier or train a new classifier?"
-    title = "Start"
-    fieldNames = ["Old","New"]
-    response = ""
-    response = gui.buttonbox(msg,title, fieldNames)
+    msg = "Do you want to load an old classifier or train a new classifier? (old/new): "
+    #title = "Start"
+    #fieldNames = ["Old","New"]
+    #response = ""
+    #response = gui.buttonbox(msg,title, fieldNames)
+    response = input(msg)
     return response
 
 def askTrainClassifier(wrap):
-    time1 = time.time()
     response = askParams()
+    time1 = time.time()
+    print("Training classifier...")
     wrap.training.trainClassifier(response[0],response[1],response[2])
     time2 = time.time()
-    print("Time to initialize train classifier: %f" % (time2-time1))
+    elapsed = time2-time1
+    minutes = int(elapsed/60)
+    seconds = elapsed - (minutes*60)
+    print("Time to train classifier: %d minutes %d seconds" % (minutes,seconds))
 
 def selectClassifier():
     path = os.getcwd()
@@ -171,14 +165,13 @@ def selectClassifier():
     
 def main():
     response = initialAsk()
-    if response == "Old":
+    response = response.lower()
+    if response == "old":
         filename = selectClassifier()
-        print(filename)
-    elif response == "New":
-        wrap = wrapper('both')
-        #Try training classifier with pca = 7 dim, knn = 3 neighbors
+    elif response == "new":
+        wrap = wrapper()
         askTrainClassifier(wrap)
-        
-
+    
 if __name__ == '__main__':
     main()
+    
