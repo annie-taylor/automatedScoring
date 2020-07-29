@@ -82,9 +82,6 @@ class Trial():
         # Both standardScale and smoothProb() change modifiedData alone
         self.pelletOrigin()
         self.smoothProb()
-        #Trying to move 'standardScale' to trainingClass instead (will be more consistent across multiple trials/sessions/rats)
-        #self.standardScale()
-        print(self.modifiedData)
 
     def standardScale(self):
         #First transforms dataset to consider initial pellet location as origin

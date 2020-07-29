@@ -20,12 +20,20 @@ class wrapper():
         choice = input('Reload old data or upload new data? (old/new): ')
         choice = choice.lower()
         if choice == 'old':
+            #Scan rat folder for preloaded pickle files
+            path = os.getcwd()
+            files = os.listdir(path+'/rats')
+            for file in files:
+                #Only load pickle files
+                if '.p' in file:
+                    loadRat = pickle.load(open(path+'/rats/'+file,'rb'))
+                    loadId = loadRat.id
+                    self.rats[loadId] = loadRat
+            
             view = input('Do you want to load direct view, side view, or both (type direct/side/both): ')
-            if view == 'both':
-                self.rats = pickle.load(open('rats.p','rb'))
+            #if view == 'both':
             #Loads all data, only saves data w/direct view
-            elif view == 'direct':
-                self.rats = pickle.load(open('rats.p','rb'))
+            if view == 'direct':
                 for ratId,rat in self.rats.items():
                     for sessionId,session in self.rats[ratId].sessions.items():
                         for trialNum,trial in self.rats[ratId].sessions[sessionId].trials.items():
@@ -38,7 +46,6 @@ class wrapper():
                             self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData = self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData.drop(drops,axis='columns')
             #Loads all data, only saves data w/side view
             elif view == 'side':
-                self.rats = pickle.load(open('rats.p','rb'))
                 for ratId,rat in self.rats.items():
                     for sessionId,session in self.rats[ratId].sessions.items():
                         for trialNum,trial in self.rats[ratId].sessions[sessionId].trials.items():
@@ -61,36 +68,39 @@ class wrapper():
     def addRat(self):
         ## Create object with dataset
         time1 = time.time()
-        try:
-            #If rats database already exists, will add rats
-            loadrats = pickle.load(open('rats.p','rb'))
-            self.rats = loadrats
-            ids = loadrats.keys()
-            print(ids)
-            for i in range(len(self.dirs)):
-                currentDir = self.dirs[i]
-                checkId = currentDir.split('/')
-                checkId = checkId[-1]
-                print(checkId)
-                if checkId not in ids:
-                    Rat1 = Rat(currentDir)
-                    currentid = Rat1.id
-                    self.rats[Rat1.id] = Rat1
-                    loadrats[currentid] = Rat1
-                    self.saveKeyErrors(Rat1)
-                else:
-                    self.rats = loadrats
-            pickle.dump(loadrats,open('rats.p','wb'))
-            self.exportKeyErrors()
-        except FileNotFoundError:
-            #If rats db does not exist, will create it
-            for i in range(len(self.dirs)):
-                Rat1 = Rat(self.dirs[i])
+        #try:
+        #If rats database already exists, will add rats
+        path = os.getcwd()
+        files = os.listdir(path+'/rats')
+        for file in files:
+            if '.p' in file:
+                loadRat = pickle.load(open(path+'/rats/'+file,'rb'))
+                self.rats[file] = loadRat
+        ids = self.rats.keys()
+        print(ids)
+        for i in range(len(self.dirs)):
+            currentDir = self.dirs[i]
+            checkId = currentDir.split('/')
+            checkId = checkId[-1]
+            if checkId not in ids:
+                print('new ratId')
+                Rat1 = Rat(currentDir)
                 currentid = Rat1.id
-                self.rats[Rat1.id] = Rat1
+                self.rats[currentid] = Rat1
                 self.saveKeyErrors(Rat1)
-            pickle.dump(self.rats,open('rats.p','wb'))
-            self.exportKeyErrors()
+                pickle.dump(self.rats[currentid],open('rats/%s.p'%currentid,'wb'))
+        self.exportKeyErrors()
+        #except FileNotFoundError:
+            #If rats db does not exist, will create it
+            #print('FileNotFoundError: This should no longer happen.')
+            #print(self.dirs)
+#            for i in range(len(self.dirs)):
+#                Rat1 = Rat(self.dirs[i])
+#                currentid = Rat1.id
+#                self.rats[Rat1.id] = Rat1
+#                self.saveKeyErrors(Rat1)
+#            pickle.dump(self.rats,open('rats.p','wb'))
+#            self.exportKeyErrors()
         time2 = time.time()
         elapsed = time2-time1
         minutes = int(elapsed/60)
@@ -114,24 +124,11 @@ class wrapper():
         time1 = time.time()
         ratList = self.rats.values()
         self.training = tc.trainingClass(ratList)
+        #Need to update policy for saving trainingclass
         pickle.dump(self.training,open('trainingClass.p','wb'))
         time2 = time.time()
         #print("Time to build trainingClass object: %f" % (time2-time1))
         return
-        
-    def reload(self):
-        #options = ['RatClasses','Rat & Training Classes','None']
-        #choice = gui.choicebox(msg='Reload earlier classes?',title='Reload Dialogue',choices=options)
-        choice = input('Reload old data or upload new data? (old/new): ')
-        choice = choice.lower()
-        if choice == 'old':
-            self.rats = pickle.load(open('rats.p','rb'))
-        #elif choice == options[1]:
-         #   self.rats = pickle.load(open('rats.p','rb'))
-         #   self.training = pickle.load(open('trainingClass.p','rb'))
-        elif choice == 'new':
-            self.addRat()
-            self.addTrainClass()
     
     def getDirs(self):
         time1 = time.time()
@@ -160,10 +157,6 @@ def askParams():
  
 def initialAsk():
     msg = "Do you want to load an old classifier or train a new classifier? (old/new): "
-    #title = "Start"
-    #fieldNames = ["Old","New"]
-    #response = ""
-    #response = gui.buttonbox(msg,title, fieldNames)
     response = input(msg)
     return response
 
@@ -196,7 +189,9 @@ def main():
     response = initialAsk()
     response = response.lower()
     if response == "old":
-        filename = selectClassifier()
+        classifierPath = selectClassifier()
+        classifier = pickle.load(open(classifierPath,'rb'))
+        classifier.useClassifier()
     elif response == "new":
         wrap = wrapper()
         askTrainClassifier(wrap)
