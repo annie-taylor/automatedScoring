@@ -73,19 +73,10 @@ class Trial():
                 'nose':'sidenosex','nose.1':'sidenosey','nose.2':'sidenosep',
                 'pellet':'sidepelletx','pellet.1':'sidepellety','pellet.2':'sidepelletp',
                                          })
-        if self.session.rat.view == 'both':
-            self.addDirectView()
-            self.data = self.data.drop('bodyparts',axis='columns')
-        elif self.session.rat.view == 'direct':
-            self.addDirectView()
-            self.data = self.data.drop('bodyparts',axis='columns')
-            columnNames = self.data.columns
-            drops = []
-            #remove all side view data (in future, modify this to not import unused data, save time)
-            for i in columnNames:
-                if 'side' in i:
-                    drops.append(i)
-            self.data = self.data.drop(drops,axis='columns')
+    
+        self.addDirectView()
+        self.data = self.data.drop('bodyparts',axis='columns')
+        
         #Continues normally if view is 'side'
         self.modifiedData = self.data.copy() # Will be used to save data after origin shift
         # Both standardScale and smoothProb() change modifiedData alone
@@ -109,111 +100,104 @@ class Trial():
         #Calls "getPelletLoc" to find average initial pellet location
         #Scales all coordinates in trial by initial pellet location
         #Also updates the "pawpref" attribute for the rat if not yet determined
-        if self.session.rat.view == 'both':
-            [sidepelletX, sidepelletY] = self.getPelletLoc('side')
-            [dirpelletX, dirpelletY] = self.getPelletLoc('direct')
-        elif self.session.rat.view == 'side':
-            [sidepelletX, sidepelletY] = self.getPelletLoc('side')
-        elif self.session.rat.view == 'direct':
-            [dirpelletX, dirpelletY] = self.getPelletLoc('direct')
         
-        if (self.session.rat.view == 'both') or (self.session.rat.view == 'side'):
-            #Shift X
-            #If left pawed
-            self.modifiedData.sidemcp1x = self.data.sidemcp1x - sidepelletX
-            self.modifiedData.sidemcp2x = self.data.sidemcp2x - sidepelletX
-            self.modifiedData.sidemcp3x = self.data.sidemcp3x - sidepelletX
-            self.modifiedData.sidemcp4x = self.data.sidemcp4x - sidepelletX
+        [sidepelletX, sidepelletY] = self.getPelletLoc('side')
+        [dirpelletX, dirpelletY] = self.getPelletLoc('direct')
+        
+        #Shift X
+        #If left pawed
+        self.modifiedData.sidemcp1x = self.data.sidemcp1x - sidepelletX
+        self.modifiedData.sidemcp2x = self.data.sidemcp2x - sidepelletX
+        self.modifiedData.sidemcp3x = self.data.sidemcp3x - sidepelletX
+        self.modifiedData.sidemcp4x = self.data.sidemcp4x - sidepelletX
+        
+        self.modifiedData.sidepip1x = self.data.sidepip1x - sidepelletX
+        self.modifiedData.sidepip2x = self.data.sidepip2x - sidepelletX
+        self.modifiedData.sidepip3x = self.data.sidepip3x - sidepelletX
+        self.modifiedData.sidepip4x = self.data.sidepip4x - sidepelletX
 
-            self.modifiedData.sidepip1x = self.data.sidepip1x - sidepelletX
-            self.modifiedData.sidepip2x = self.data.sidepip2x - sidepelletX
-            self.modifiedData.sidepip3x = self.data.sidepip3x - sidepelletX
-            self.modifiedData.sidepip4x = self.data.sidepip4x - sidepelletX
+        self.modifiedData.sidedigit1x = self.data.sidedigit1x - sidepelletX
+        self.modifiedData.sidedigit2x = self.data.sidedigit2x - sidepelletX
+        self.modifiedData.sidedigit3x = self.data.sidedigit3x - sidepelletX
+        self.modifiedData.sidedigit4x = self.data.sidedigit4x - sidepelletX
 
-            self.modifiedData.sidedigit1x = self.data.sidedigit1x - sidepelletX
-            self.modifiedData.sidedigit2x = self.data.sidedigit2x - sidepelletX
-            self.modifiedData.sidedigit3x = self.data.sidedigit3x - sidepelletX
-            self.modifiedData.sidedigit4x = self.data.sidedigit4x - sidepelletX
+        #Always
+        self.modifiedData.sidepawdorsumx = self.data.sidepawdorsumx - sidepelletX
+        self.modifiedData.sidenosex = self.data.sidenosex - sidepelletX
+        self.modifiedData.sidepelletx = self.data.sidepelletx - sidepelletX
+        self.modifiedData.sidecontrapawdorsumx = self.data.sidecontrapawdorsumx - sidepelletX
 
-            #Always
-            self.modifiedData.sidepawdorsumx = self.data.sidepawdorsumx - sidepelletX
-            self.modifiedData.sidenosex = self.data.sidenosex - sidepelletX
-            self.modifiedData.sidepelletx = self.data.sidepelletx - sidepelletX
-            self.modifiedData.sidecontrapawdorsumx = self.data.sidecontrapawdorsumx - sidepelletX
+        #Shift Y
+        #If left pawed
+        self.modifiedData.sidemcp1y = self.data.sidemcp1y - sidepelletY
+        self.modifiedData.sidemcp2y = self.data.sidemcp2y - sidepelletY
+        self.modifiedData.sidemcp3y = self.data.sidemcp3y - sidepelletY
+        self.modifiedData.sidemcp4y = self.data.sidemcp4y - sidepelletY
 
-            #Shift Y
-            #If left pawed
-            self.modifiedData.sidemcp1y = self.data.sidemcp1y - sidepelletY
-            self.modifiedData.sidemcp2y = self.data.sidemcp2y - sidepelletY
-            self.modifiedData.sidemcp3y = self.data.sidemcp3y - sidepelletY
-            self.modifiedData.sidemcp4y = self.data.sidemcp4y - sidepelletY
+        self.modifiedData.sidepip1y = self.data.sidepip1y - sidepelletY
+        self.modifiedData.sidepip2y = self.data.sidepip2y - sidepelletY
+        self.modifiedData.sidepip3y = self.data.sidepip3y - sidepelletY
+        self.modifiedData.sidepip4y = self.data.sidepip4y - sidepelletY
 
-            self.modifiedData.sidepip1y = self.data.sidepip1y - sidepelletY
-            self.modifiedData.sidepip2y = self.data.sidepip2y - sidepelletY
-            self.modifiedData.sidepip3y = self.data.sidepip3y - sidepelletY
-            self.modifiedData.sidepip4y = self.data.sidepip4y - sidepelletY
-
-            self.modifiedData.sidedigit1y = self.data.sidedigit1y - sidepelletY
-            self.modifiedData.sidedigit2y = self.data.sidedigit2y - sidepelletY
-            self.modifiedData.sidedigit3y = self.data.sidedigit3y - sidepelletY
-            self.modifiedData.sidedigit4y = self.data.sidedigit4y - sidepelletY
+        self.modifiedData.sidedigit1y = self.data.sidedigit1y - sidepelletY
+        self.modifiedData.sidedigit2y = self.data.sidedigit2y - sidepelletY
+        self.modifiedData.sidedigit3y = self.data.sidedigit3y - sidepelletY
+        self.modifiedData.sidedigit4y = self.data.sidedigit4y - sidepelletY
 
             #always
-            self.modifiedData.sidepawdorsumy = self.data.sidepawdorsumy - sidepelletY
-            self.modifiedData.sidenosey = self.data.sidenosey - sidepelletY
-            self.modifiedData.sidepellety = self.data.sidepellety - sidepelletY
-            self.modifiedData.sidecontrapawdorsumy = self.data.sidecontrapawdorsumy - sidepelletY
+        self.modifiedData.sidepawdorsumy = self.data.sidepawdorsumy - sidepelletY
+        self.modifiedData.sidenosey = self.data.sidenosey - sidepelletY
+        self.modifiedData.sidepellety = self.data.sidepellety - sidepelletY
+        self.modifiedData.sidecontrapawdorsumy = self.data.sidecontrapawdorsumy - sidepelletY
         
-       
-        if (self.session.rat.view == 'both') or (self.session.rat.view == 'direct'):
-            # Same as above but for direct view
-            # Need to have a separate pelletOrigin function for direct and side views
+        # Same as above but for direct view
+        # Need to have a separate pelletOrigin function for direct and side views
             
-            #Shift X
-            #If left pawed
-            self.modifiedData.dirmcp1x = self.data.dirmcp1x - dirpelletX
-            self.modifiedData.dirmcp2x = self.data.dirmcp2x - dirpelletX
-            self.modifiedData.dirmcp3x = self.data.dirmcp3x - dirpelletX
-            self.modifiedData.dirmcp4x = self.data.dirmcp4x - dirpelletX
+        #Shift X
+        #If left pawed
+        self.modifiedData.dirmcp1x = self.data.dirmcp1x - dirpelletX
+        self.modifiedData.dirmcp2x = self.data.dirmcp2x - dirpelletX
+        self.modifiedData.dirmcp3x = self.data.dirmcp3x - dirpelletX
+        self.modifiedData.dirmcp4x = self.data.dirmcp4x - dirpelletX
             
-            self.modifiedData.dirpip1x = self.data.dirpip1x - dirpelletX
-            self.modifiedData.dirpip2x = self.data.dirpip2x - dirpelletX
-            self.modifiedData.dirpip3x = self.data.dirpip3x - dirpelletX
-            self.modifiedData.dirpip4x = self.data.dirpip4x - dirpelletX
+        self.modifiedData.dirpip1x = self.data.dirpip1x - dirpelletX
+        self.modifiedData.dirpip2x = self.data.dirpip2x - dirpelletX
+        self.modifiedData.dirpip3x = self.data.dirpip3x - dirpelletX
+        self.modifiedData.dirpip4x = self.data.dirpip4x - dirpelletX
 
-            self.modifiedData.dirdigit1x = self.data.dirdigit1x - dirpelletX
-            self.modifiedData.dirdigit2x = self.data.dirdigit2x - dirpelletX
-            self.modifiedData.dirdigit3x = self.data.dirdigit3x - dirpelletX
-            self.modifiedData.dirdigit4x = self.data.dirdigit4x - dirpelletX
+        self.modifiedData.dirdigit1x = self.data.dirdigit1x - dirpelletX
+        self.modifiedData.dirdigit2x = self.data.dirdigit2x - dirpelletX
+        self.modifiedData.dirdigit3x = self.data.dirdigit3x - dirpelletX
+        self.modifiedData.dirdigit4x = self.data.dirdigit4x - dirpelletX
 
-            #Always
-            self.modifiedData.dirpawdorsumx = self.data.dirpawdorsumx - dirpelletX
-            self.modifiedData.dirnosex = self.data.dirnosex - dirpelletX
-            self.modifiedData.dirpelletx = self.data.dirpelletx - dirpelletX
-            self.modifiedData.dircontrapawdorsumx = self.data.dircontrapawdorsumx - dirpelletX
+        #Always
+        self.modifiedData.dirpawdorsumx = self.data.dirpawdorsumx - dirpelletX
+        self.modifiedData.dirnosex = self.data.dirnosex - dirpelletX
+        self.modifiedData.dirpelletx = self.data.dirpelletx - dirpelletX
+        self.modifiedData.dircontrapawdorsumx = self.data.dircontrapawdorsumx - dirpelletX
 
-            #Shift Y
-            #If left pawed
-            self.modifiedData.dirmcp1y = self.data.dirmcp1y - dirpelletY
-            self.modifiedData.dirmcp2y = self.data.dirmcp2y - dirpelletY
-            self.modifiedData.dirmcp3y = self.data.dirmcp3y - dirpelletY
-            self.modifiedData.dirmcp4y = self.data.dirmcp4y - dirpelletY
+        #Shift Y
+        #If left pawed
+        self.modifiedData.dirmcp1y = self.data.dirmcp1y - dirpelletY
+        self.modifiedData.dirmcp2y = self.data.dirmcp2y - dirpelletY
+        self.modifiedData.dirmcp3y = self.data.dirmcp3y - dirpelletY
+        self.modifiedData.dirmcp4y = self.data.dirmcp4y - dirpelletY
 
-            self.modifiedData.dirpip1y = self.data.dirpip1y - dirpelletY
-            self.modifiedData.dirpip2y = self.data.dirpip2y - dirpelletY
-            self.modifiedData.dirpip3y = self.data.dirpip3y - dirpelletY
-            self.modifiedData.dirpip4y = self.data.dirpip4y - dirpelletY
+        self.modifiedData.dirpip1y = self.data.dirpip1y - dirpelletY
+        self.modifiedData.dirpip2y = self.data.dirpip2y - dirpelletY
+        self.modifiedData.dirpip3y = self.data.dirpip3y - dirpelletY
+        self.modifiedData.dirpip4y = self.data.dirpip4y - dirpelletY
 
-            self.modifiedData.dirdigit1y = self.data.dirdigit1y - dirpelletY
-            self.modifiedData.dirdigit2y = self.data.dirdigit2y - dirpelletY
-            self.modifiedData.dirdigit3y = self.data.dirdigit3y - dirpelletY
-            self.modifiedData.dirdigit4y = self.data.dirdigit4y - dirpelletY
+        self.modifiedData.dirdigit1y = self.data.dirdigit1y - dirpelletY
+        self.modifiedData.dirdigit2y = self.data.dirdigit2y - dirpelletY
+        self.modifiedData.dirdigit3y = self.data.dirdigit3y - dirpelletY
+        self.modifiedData.dirdigit4y = self.data.dirdigit4y - dirpelletY
             
-            #always
-            self.modifiedData.dirpawdorsumy = self.data.dirpawdorsumy - dirpelletY
-            self.modifiedData.dirnosey = self.data.dirnosey - dirpelletY
-            self.modifiedData.dirpellety = self.data.dirpellety - dirpelletY
-            self.modifiedData.dircontrapawdorsumy = self.data.dircontrapawdorsumy - dirpelletY
+        #always
+        self.modifiedData.dirpawdorsumy = self.data.dirpawdorsumy - dirpelletY
+        self.modifiedData.dirnosey = self.data.dirnosey - dirpelletY
+        self.modifiedData.dirpellety = self.data.dirpellety - dirpelletY
+        self.modifiedData.dircontrapawdorsumy = self.data.dircontrapawdorsumy - dirpelletY
                 
         return
     
@@ -431,8 +415,7 @@ class Trial():
 
     def dropProb(self):
         #Now that probability has been incorporated, drop probability values
-        if self.session.rat.view == 'both':
-            self.modifiedData = self.modifiedData.drop(['sidemcp1p','sidemcp2p','sidemcp3p','sidemcp4p',
+        self.modifiedData = self.modifiedData.drop(['sidemcp1p','sidemcp2p','sidemcp3p','sidemcp4p',
             'sidepip1p','sidepip2p','sidepip3p','sidepip4p',
             'sidedigit1p','sidedigit2p','sidedigit3p','sidedigit4p',
             'sidepawdorsump','sidenosep','sidepelletp','sidecontrapawdorsump',
@@ -441,19 +424,7 @@ class Trial():
             'dirdigit1p','dirdigit2p','dirdigit3p','dirdigit4p',
             'dirpawdorsump','dirnosep','dirpelletp','dircontrapawdorsump'],
             axis='columns')
-        elif self.session.rat.view == 'side':
-            self.modifiedData = self.modifiedData.drop(['sidemcp1p','sidemcp2p','sidemcp3p','sidemcp4p',
-            'sidepip1p','sidepip2p','sidepip3p','sidepip4p',
-            'sidedigit1p','sidedigit2p','sidedigit3p','sidedigit4p',
-            'sidepawdorsump','sidenosep','sidepelletp'],
-            axis='columns')
-        elif self.session.rat.view == 'direct':
-            self.modifiedData = self.modifiedData.drop([
-            'dirmcp1p','dirmcp2p','dirmcp3p','dirmcp4p',
-            'dirpip1p','dirpip2p','dirpip3p','dirpip4p',
-            'dirdigit1p','dirdigit2p','dirdigit3p','dirdigit4p',
-            'dirpawdorsump','dirnosep','dirpelletp','dircontrapawdorsump'],
-            axis='columns')
+        
         return
     
     def plotTrajectories(self,bodyPart,showProb):

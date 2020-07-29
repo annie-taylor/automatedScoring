@@ -23,6 +23,10 @@ class wrapper():
         choice = choice.lower()
         #choice = gui.choicebox(msg='Reload earlier classes?',title='Reload Dialogue',choices=options)
         if choice == 'old':
+            view = input('Do you want to load direct view, side view, or both (type direct/side/both): ')
+            #if view == 'both':
+            #elif view == 'direct':
+            #elif view == 'side':
             self.rats = pickle.load(open('rats.p','rb'))
             print('Building trainingClass object...')
             self.addTrainClass()
@@ -32,8 +36,7 @@ class wrapper():
         elif choice == 'new':
             print('Opening window to select files...')
             self.getDirs()
-            view = input('Do you want to incorporate direct view, side view, or both (type direct/side/both): ')
-            self.addRat(view)
+            self.addRat()
             print('Building trainingClass object...')
             self.addTrainClass()
             
@@ -43,14 +46,22 @@ class wrapper():
         try:
             #If rats database already exists, will add rats
             loadrats = pickle.load(open('rats.p','rb'))
+            self.rats = loadrats
             ids = loadrats.keys()
+            print(ids)
             for i in range(len(self.dirs)):
-                Rat1 = Rat(self.dirs[i],view)
-                currentid = Rat1.id
-                self.rats[Rat1.id] = Rat1
-                if currentid not in ids:
+                currentDir = self.dirs[i]
+                checkId = currentDir.split('/')
+                checkId = checkId[-1]
+                print(checkId)
+                if checkId not in ids:
+                    Rat1 = Rat(currentDir,view)
+                    currentid = Rat1.id
+                    self.rats[Rat1.id] = Rat1
                     loadrats[currentid] = Rat1
                     self.saveKeyErrors(Rat1)
+                else:
+                    self.rats = loadrats
             pickle.dump(loadrats,open('rats.p','wb'))
             self.exportKeyErrors()
         except FileNotFoundError:
