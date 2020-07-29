@@ -41,17 +41,18 @@ class trainingClass:
                     reshaped = []
                     first = True
                     for row in modDat:
-                        #print(row)
-                        #break
                         if first:
                             reshaped = row
                             first = False
                         else:
                             reshaped = np.concatenate((reshaped, row))
+                    print(np.shape(reshaped))
                     reshaped_mod.append(reshaped)
                     reshaped_lab.append(lab)
+
             self.ratModifiedData[rat.id] = reshaped_mod
             self.ratLabels[rat.id] = reshaped_lab
+        print(self.ratModifiedData.keys())
                 
 
     def splitData(self,test_frac):
@@ -61,8 +62,10 @@ class trainingClass:
         trialData_reshaped = []
         allLabels = []
         first = True
-    
+        
         for ratId,rat in self.ratModifiedData.items():
+            print(ratId)
+            print(np.shape(rat))
             if first:
                 allData = rat
                 first = False
@@ -71,25 +74,31 @@ class trainingClass:
                 allData = np.concatenate((allData,rat))
                 allLabels = np.concatenate((allLabels,self.ratLabels[ratId]))
         
+        print(np.shape(allData))
+        print(type(allData))
+        
         trainData, testData, trainLabel, testLabel = train_test_split(allData, allLabels, test_size=test_frac)
+        
         return trainData, testData, trainLabel, testLabel
         #return
 
     def trainClassifier(self,n_components,n_neighbors,test_frac):
-        #Implements pipeline to fit PCA transform and kNN classifier,
+        #Implements pipeline to fit Scaler, PCA transform and kNN classifier,
         #saves parameters for both as attributes of trainingClass
         #prints training and test score for the classifier
-        pipe = Pipeline([('ipca', IncrementalPCA(n_components = n_components)),
+        pipe = Pipeline([('scaler',StandardScaler()),('ipca', IncrementalPCA(n_components = n_components)),
                         ('knn', BaggingClassifier(base_estimator=kNN(n_neighbors = n_neighbors,weights = 'distance'),n_estimators=5))],verbose=True )
+                        
         trainData, testData, trainLabel, testLabel = self.splitData(test_frac)
+        
         pipe.fit(trainData,trainLabel)
         
         self.PCAmodel = pipe.named_steps['ipca']
         self.kNNmodel = pipe.named_steps['knn']
         
         #Save classifier as pck
-        #pickle.dump(self.PCAmodel,open('PCAmodel.p','wb'))
-        #pickle.dump(self.kNNmodel,open('kNNmodel.p','wb'))
+        pickle.dump(self.PCAmodel,open('PCAmodel.p','wb'))
+        pickle.dump(self.kNNmodel,open('kNNmodel.p','wb'))
         
         wholeModel = {'PCA':self.PCAmodel,'kNN':self.kNNmodel}
         
