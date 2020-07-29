@@ -4,6 +4,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.ensemble import BaggingClassifier
 from sklearn.neighbors import KNeighborsClassifier as kNN
+from sklearn.preprocessing import StandardScaler
 import pickle
 import easygui as gui
 
@@ -46,13 +47,13 @@ class trainingClass:
                             first = False
                         else:
                             reshaped = np.concatenate((reshaped, row))
-                    print(np.shape(reshaped))
+                    #print(np.shape(reshaped))
                     reshaped_mod.append(reshaped)
                     reshaped_lab.append(lab)
 
             self.ratModifiedData[rat.id] = reshaped_mod
             self.ratLabels[rat.id] = reshaped_lab
-        print(self.ratModifiedData.keys())
+        #print(self.ratModifiedData.keys())
                 
 
     def splitData(self,test_frac):
@@ -64,8 +65,8 @@ class trainingClass:
         first = True
         
         for ratId,rat in self.ratModifiedData.items():
-            print(ratId)
-            print(np.shape(rat))
+            #print(ratId)
+            #print(np.shape(rat))
             if first:
                 allData = rat
                 first = False
@@ -74,8 +75,8 @@ class trainingClass:
                 allData = np.concatenate((allData,rat))
                 allLabels = np.concatenate((allLabels,self.ratLabels[ratId]))
         
-        print(np.shape(allData))
-        print(type(allData))
+        #print(np.shape(allData))
+        #print(type(allData))
         
         trainData, testData, trainLabel, testLabel = train_test_split(allData, allLabels, test_size=test_frac)
         

@@ -17,22 +17,40 @@ class wrapper():
         self.rats = {}
         self.training = 0
         self.keyerrors = pd.DataFrame()
-        #Might not really need all three options, two might be enough
-        #options = ['Existing rat data','Existing rat and training class data','Upload new data']
         choice = input('Reload old data or upload new data? (old/new): ')
         choice = choice.lower()
-        #choice = gui.choicebox(msg='Reload earlier classes?',title='Reload Dialogue',choices=options)
         if choice == 'old':
             view = input('Do you want to load direct view, side view, or both (type direct/side/both): ')
-            #if view == 'both':
-            #elif view == 'direct':
-            #elif view == 'side':
-            self.rats = pickle.load(open('rats.p','rb'))
+            if view == 'both':
+                self.rats = pickle.load(open('rats.p','rb'))
+            #Loads all data, only saves data w/direct view
+            elif view == 'direct':
+                self.rats = pickle.load(open('rats.p','rb'))
+                for ratId,rat in self.rats.items():
+                    for sessionId,session in self.rats[ratId].sessions.items():
+                        for trialNum,trial in self.rats[ratId].sessions[sessionId].trials.items():
+                            data = self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData
+                            columnNames = self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData.columns
+                            drops = []
+                            for i in columnNames:
+                                if 'side' in i:
+                                    drops.append(i)
+                            self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData = self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData.drop(drops,axis='columns')
+            #Loads all data, only saves data w/side view
+            elif view == 'side':
+                self.rats = pickle.load(open('rats.p','rb'))
+                for ratId,rat in self.rats.items():
+                    for sessionId,session in self.rats[ratId].sessions.items():
+                        for trialNum,trial in self.rats[ratId].sessions[sessionId].trials.items():
+                            data = self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData
+                            columnNames = self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData.columns
+                            drops = []
+                            for i in columnNames:
+                                if 'dir' in i:
+                                    drops.append(i)
+                            self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData = self.rats[ratId].sessions[sessionId].trials[trialNum].modifiedData.drop(drops,axis='columns')
             print('Building trainingClass object...')
             self.addTrainClass()
-        #elif choice == 2:
-        #    self.rats = pickle.load(open('rats.p','rb'))
-        #    self.training = pickle.load(open('trainingClass.p','rb'))
         elif choice == 'new':
             print('Opening window to select files...')
             self.getDirs()
@@ -40,7 +58,7 @@ class wrapper():
             print('Building trainingClass object...')
             self.addTrainClass()
             
-    def addRat(self,view):
+    def addRat(self):
         ## Create object with dataset
         time1 = time.time()
         try:
@@ -55,7 +73,7 @@ class wrapper():
                 checkId = checkId[-1]
                 print(checkId)
                 if checkId not in ids:
-                    Rat1 = Rat(currentDir,view)
+                    Rat1 = Rat(currentDir)
                     currentid = Rat1.id
                     self.rats[Rat1.id] = Rat1
                     loadrats[currentid] = Rat1
@@ -67,7 +85,7 @@ class wrapper():
         except FileNotFoundError:
             #If rats db does not exist, will create it
             for i in range(len(self.dirs)):
-                Rat1 = Rat(self.dirs[i],view)
+                Rat1 = Rat(self.dirs[i])
                 currentid = Rat1.id
                 self.rats[Rat1.id] = Rat1
                 self.saveKeyErrors(Rat1)
@@ -77,7 +95,7 @@ class wrapper():
         elapsed = time2-time1
         minutes = int(elapsed/60)
         seconds = elapsed - (minutes*60)
-        print("Total time for preprocessing: %d minutes %d seconds" % (minutes,seconds))
+        print("Total time to load dataset: %d minutes %d seconds" % (minutes,seconds))
         return
 
     def saveKeyErrors(self,Rat):
