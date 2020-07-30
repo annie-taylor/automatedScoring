@@ -44,14 +44,10 @@ class trainingClass:
                             first = False
                         else:
                             reshaped = np.concatenate((reshaped, row))
-                        #print(np.shape(reshaped))
                     reshaped_mod.append(reshaped)
-                    #print(np.shape(reshaped_mod))
                     reshaped_lab.append(lab)
             self.ratModifiedData[rat.id] = reshaped_mod
             self.ratLabels[rat.id] = reshaped_lab
-        
-                
 
     def splitData(self,test_frac):
         #Divides data from trainingClass into training and test sets

@@ -77,30 +77,17 @@ class wrapper():
                 loadRat = pickle.load(open(path+'/rats/'+file,'rb'))
                 self.rats[file] = loadRat
         ids = self.rats.keys()
-        print(ids)
         for i in range(len(self.dirs)):
             currentDir = self.dirs[i]
             checkId = currentDir.split('/')
             checkId = checkId[-1]
             if checkId not in ids:
-                print('new ratId')
                 Rat1 = Rat(currentDir)
                 currentid = Rat1.id
                 self.rats[currentid] = Rat1
                 self.saveKeyErrors(Rat1)
                 pickle.dump(self.rats[currentid],open('rats/%s.p'%currentid,'wb'))
         self.exportKeyErrors()
-        #except FileNotFoundError:
-            #If rats db does not exist, will create it
-            #print('FileNotFoundError: This should no longer happen.')
-            #print(self.dirs)
-#            for i in range(len(self.dirs)):
-#                Rat1 = Rat(self.dirs[i])
-#                currentid = Rat1.id
-#                self.rats[Rat1.id] = Rat1
-#                self.saveKeyErrors(Rat1)
-#            pickle.dump(self.rats,open('rats.p','wb'))
-#            self.exportKeyErrors()
         time2 = time.time()
         elapsed = time2-time1
         minutes = int(elapsed/60)
@@ -111,6 +98,7 @@ class wrapper():
     def saveKeyErrors(self,Rat):
         #This is not working properly
         id = Rat.id
+        print('Key Errors: %s' % Rat.keyerrors)
         self.keyerrors.append({id:Rat.keyerrors},ignore_index=True)
         return
     
@@ -156,9 +144,15 @@ def askParams():
     return values
  
 def initialAsk():
+    msg = "Do you want to load new data or train/use a new classifier? (data/classifier): "
+    response = input(msg)
+    return response
+    
+def classifierAsk():
     msg = "Do you want to load an old classifier or train a new classifier? (old/new): "
     response = input(msg)
     return response
+    
 
 def askTrainClassifier(wrap):
     response = askParams()
@@ -186,15 +180,34 @@ def selectClassifier():
     return response
     
 def main():
-    response = initialAsk()
-    response = response.lower()
-    if response == "old":
-        classifierPath = selectClassifier()
-        classifier = pickle.load(open(classifierPath,'rb'))
-        classifier.useClassifier()
-    elif response == "new":
+    response1 = initialAsk()
+    response1 = response1.lower()
+    if response1 == "data":
         wrap = wrapper()
-        askTrainClassifier(wrap)
+        next = input("Do you want to train a new classifier now or stop? (train/stop) ")
+        next = next.lower()
+        if next == "train":
+            response2 = classifierAsk()
+            response2 = response2.lower()
+            if response2 == "old":
+                classifierPath = selectClassifier()
+                classifier = pickle.load(open(classifierPath,'rb'))
+                classifier.useClassifier()
+            elif response2 == "new":
+                wrap = wrapper()
+                askTrainClassifier(wrap)
+        elif next == "stop":
+            print("Done uploading data.")
+    elif response1 == "classifier":
+        response2 = classifierAsk()
+        response2 = response2.lower()
+        if response2 == "old":
+            classifierPath = selectClassifier()
+            classifier = pickle.load(open(classifierPath,'rb'))
+            classifier.useClassifier()
+        elif response2 == "new":
+            wrap = wrapper()
+            askTrainClassifier(wrap)
     
 if __name__ == '__main__':
     main()
